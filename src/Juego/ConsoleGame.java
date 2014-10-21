@@ -20,9 +20,17 @@ import Juego.ai.AiSolver;
 import Juego.dataobjects.ActionStatus;
 import Juego.game.Board;
 import Juego.dataobjects.Direction;
+import static Juego.dataobjects.Json.readJsonFromUrl;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Scanner;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.Charset;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 
 /**
  * The main class of the Game.
@@ -42,7 +50,8 @@ public class ConsoleGame {
         System.out.println("The 2048 Game in JAVA!");
         System.out.println("======================");
         System.out.println();
-        System.out.println("The Game is developed by Vasilis Vryniotis, visit Datumbox.com for more information. This implementation is based on the ideas and projects of Gabriele Cirulli and Matt Overlan.");
+
+        
         while(true) {
             printMenu();
             int choice;
@@ -56,7 +65,9 @@ public class ConsoleGame {
                              break;
                     case 3:  help();
                              break;
-                    case 4:  return;
+                    case 4:  redHat();
+                             break;
+                    case 5:  return;
                     default: throw new Exception();
                 }
             }
@@ -65,6 +76,35 @@ public class ConsoleGame {
             }
         }
     }
+    
+    
+     private static String readAll(Reader rd) throws IOException {
+    StringBuilder sb = new StringBuilder();
+    int cp;
+    while ((cp = rd.read()) != -1) {
+      sb.append((char) cp);
+    }
+    return sb.toString();
+  }
+
+   public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+    InputStream is = new URL(url).openStream();
+    try {
+      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+      String jsonText = readAll(rd);
+      JSONObject json = new JSONObject(jsonText);
+      return json;
+    } finally {
+      is.close();
+    }
+   }
+  
+   public static void movementJson(int m, Board game) throws IOException, JSONException {
+       String Session = game.getSession();
+       JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/state/" + Session + "/move/" + m + "/json");
+       game.setBoard(json.get("grid").toString());
+       game.setScore(json.get("score").toString());
+   }
     
     /**
      * Prints Help menu
@@ -82,7 +122,8 @@ public class ConsoleGame {
         System.out.println("1. Play the 2048 Game");
         System.out.println("2. Estimate the Accuracy of AI Solver");
         System.out.println("3. Help");
-        System.out.println("4. Quit");
+        System.out.println("4. Red Hat");
+        System.out.println("5. Quit");
         System.out.println();
         System.out.println("Enter a number from 1-4:");
     }
@@ -99,7 +140,7 @@ public class ConsoleGame {
         System.out.println("Running "+total+" games to estimate the accuracy:");
         
         for(int i=0;i<total;++i) {
-            int hintDepth = 5;
+            int hintDepth = 7;
             Board theGame = new Board();
             Direction hint = AiSolver.findBestMove(theGame, hintDepth);
             ActionStatus result=ActionStatus.CONTINUE;
@@ -124,6 +165,46 @@ public class ConsoleGame {
         }
         
         System.out.println(wins+" wins out of "+total+" games.");
+    }
+    
+    public static int dirToInt (Direction hint){
+        if (hint==Direction.UP){
+            return 0;
+        }
+        else if (hint==Direction.RIGHT){
+            return 1;
+        }
+        else if (hint==Direction.DOWN){
+            return 2;
+        }
+        else{
+            return 3;
+        }
+
+        
+    }
+    
+    public static void redHat() throws CloneNotSupportedException, IOException, JSONException{
+        
+        int hintDepth = 7;
+        int mov;
+        
+        System.out.println("Running Red Hat Game: ");
+        
+        JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/start/MTG/json");
+        Board game = new Board(json.get("grid").toString());
+        game.setScore(json.get("score").toString());
+        game.setSession(json.get("session_id").toString());
+        game.setWon(json.get("won").toString());
+        game.setOver(json.get("over").toString());
+        
+        Direction hint = AiSolver.findBestMove(game, hintDepth);
+        
+        mov = dirToInt(hint);
+        movementJson(mov, game);
+        
+
+        
     }
     
     /**

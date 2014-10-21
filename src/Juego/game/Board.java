@@ -1,19 +1,3 @@
-/* 
- * Copyright (C) 2014 Vasilis Vryniotis <bbriniotis at datumbox.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package Juego.game;
 
 import Juego.dataobjects.ActionStatus;
@@ -48,6 +32,12 @@ public class Board implements Cloneable {
      */
     private int score=0;
     
+    private int won=0;
+    
+    private int over=0;
+    
+    private String Session=null;
+    
     /**
      * The board values
      */
@@ -56,22 +46,40 @@ public class Board implements Cloneable {
     /**
      * Random Generator which is used in the creation of random cells
      */
-    private final Random randomGenerator;
+    //private final Random randomGenerator;
     
     /**
      * It caches the number of empty cells
      */
     private Integer cache_emptyCells=null;
+    private String s;
     
     /**
      * Constructor without arguments. It initializes randomly the Board
      */
+    /* 
+    No necesito esto para el Red Hat
+    */
     public Board() {
         boardArray = new int[BOARD_SIZE][BOARD_SIZE];
-        randomGenerator = new Random(System.currentTimeMillis());
+        //randomGenerator = new Random(System.currentTimeMillis());
         
         addRandomCell();
         addRandomCell();
+        
+    }
+    
+    public Board(String s) {
+        boardArray = new int[BOARD_SIZE][BOARD_SIZE];
+        setBoard(s);
+        //randomGenerator = new Random(System.currentTimeMillis());
+    }
+    
+    public void setBoard(String s){
+        String myNums[] = s.split("[^0-9]+");
+        for(int i = 0; i < 4; i++)
+            for(int j = 0; j < 4; j++)
+                boardArray[i][j] = Integer.parseInt(myNums[i*4 + j + 1]);
         
     }
     
@@ -110,9 +118,9 @@ public class Board implements Cloneable {
      * 
      * @return 
      */
-    public Random getRandomGenerator() {
-        return randomGenerator;
-    }
+    //public Random getRandomGenerator() {
+    //    return randomGenerator;
+    //}
     
     /**
      * Performs one move (up, down, left or right).
@@ -327,6 +335,35 @@ public class Board implements Cloneable {
         }
     }
     
+    public void setScore(String s) {
+        score=Integer.parseInt(s);
+    }
+    
+    public String getSession() {
+        return Session;
+    }
+    
+    public void setSession(String s) {
+        Session=s;
+    }
+    
+    public void setWon(String s) {
+        won=Integer.parseInt(s);
+    }
+    
+    public void setOver(String s) {
+        over=Integer.parseInt(s);
+    }
+    
+    public int getWon() {
+        return won;
+    }
+    
+    public int getOver() {
+        return over;
+    }
+    
+    
     /**
      * Rotates the board on the left
      */
@@ -361,23 +398,23 @@ public class Board implements Cloneable {
      * Creates a new Random Cell
      */
     private boolean addRandomCell() {
-        List<Integer> emptyCells = getEmptyCellIds();
-        
-        int listSize=emptyCells.size();
-        
-        if(listSize==0) {
-            return false;
-        }
-        
-        int randomCellId=emptyCells.get(randomGenerator.nextInt(listSize));
-        int randomValue=(randomGenerator.nextDouble()< 0.9)?2:4;
-        
-        int i = randomCellId/BOARD_SIZE;
-        int j = randomCellId%BOARD_SIZE;
-        
-        setEmptyCell(i, j, randomValue);
-        
-        return true;
+//        List<Integer> emptyCells = getEmptyCellIds();
+//        
+//        int listSize=emptyCells.size();
+//        
+//        if(listSize==0) {
+//            return false;
+//        }
+//        
+//        //int randomCellId=emptyCells.get(randomGenerator.nextInt(listSize));
+//        //int randomValue=(randomGenerator.nextDouble()< 0.9)?2:4;
+//        
+//        int i = randomCellId/BOARD_SIZE;
+//        int j = randomCellId%BOARD_SIZE;
+//        
+//        setEmptyCell(i, j, randomValue);
+//        
+      return true;
     }
     
     /**
