@@ -31,6 +31,7 @@ public class Board implements Cloneable {
      * The score so far
      */
     private int score=0;
+    private int moves=0;
     
     private boolean won=false;
     
@@ -333,6 +334,14 @@ public class Board implements Cloneable {
             boardArray[i][j]=value;
             cache_emptyCells=null;
         }
+    }
+    
+    public void setMoves(String s) {
+        moves=Integer.parseInt(s);
+    }
+    
+    public int getMoves(){
+        return moves;
     }
     
     public void setScore(String s) {

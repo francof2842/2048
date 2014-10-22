@@ -20,7 +20,6 @@ import Juego.ai.AiSolver;
 import Juego.dataobjects.ActionStatus;
 import Juego.game.Board;
 import Juego.dataobjects.Direction;
-import static Juego.dataobjects.Json.readJsonFromUrl;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Scanner;
@@ -191,10 +190,15 @@ public class ConsoleGame {
         game.setScore(json.get("score").toString());
         game.setWon(json.get("won").toString());
         game.setOver(json.get("over").toString());
+        game.setMoves(json.get("moves").toString());
+        
+        
     }
     
     public static void printFullBoard(Board game, JSONObject json, Direction hint){
         printBoard(game.getBoardArray(), game.getScore(), hint);
+        System.out.println("Movimiento N: " + game.getMoves());
+        System.out.println("Session Id " + game.getSession());
     }
     
     public static void redHat() throws CloneNotSupportedException, IOException, JSONException{
