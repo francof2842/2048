@@ -99,9 +99,11 @@ public class ConsoleGame {
     }
    }
   
-   public static void movementJson(int m, Board game, Direction hint) throws IOException, JSONException {
+   public static void movementJson(Board game, Direction hint) throws IOException, JSONException {
+       int mov;
+       mov = dirToInt(hint);
        String Session = game.getSession();
-       JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/state/" + Session + "/move/" + m + "/json");
+       JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/state/" + Session + "/move/" + mov + "/json");
        game.setBoard(json.get("grid").toString());
        setBoardStatus(game, json);
        printFullBoard(game, json, hint);
@@ -198,7 +200,6 @@ public class ConsoleGame {
     public static void redHat() throws CloneNotSupportedException, IOException, JSONException{
         
         int hintDepth = 7;
-        int mov;
         
         System.out.println("Running Red Hat Game: ");
         
@@ -209,15 +210,13 @@ public class ConsoleGame {
 
         
         Direction hint = AiSolver.findBestMove(game, hintDepth);
-        mov = dirToInt(hint);
-        movementJson(mov, game, hint);
+        movementJson(game, hint);
         setBoardStatus(game, json);
         printFullBoard(game, json, hint);
         
         while (game.getWon() == false && game.getOver() == false){
             hint = AiSolver.findBestMove(game, hintDepth);
-            mov = dirToInt(hint);
-            movementJson(mov, game, hint);
+            movementJson(game, hint);
             
         }
         
