@@ -72,7 +72,7 @@ public class Json {
        
     JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/start/MTG/json");
     System.out.println(json.toString());
-    System.out.println(json.get("grid").);
+    System.out.println(json.get("grid"));
     System.out.println(json.get("score"));
     System.out.println(json.get("group"));
    }

@@ -32,9 +32,9 @@ public class Board implements Cloneable {
      */
     private int score=0;
     
-    private int won=0;
+    private boolean won=false;
     
-    private int over=0;
+    private boolean over=false;
     
     private String Session=null;
     
@@ -348,18 +348,18 @@ public class Board implements Cloneable {
     }
     
     public void setWon(String s) {
-        won=Integer.parseInt(s);
+        won=Boolean.valueOf(s);
     }
     
     public void setOver(String s) {
-        over=Integer.parseInt(s);
+        over=Boolean.valueOf(s);
     }
     
-    public int getWon() {
+    public boolean getWon() {
         return won;
     }
     
-    public int getOver() {
+    public boolean getOver() {
         return over;
     }
     

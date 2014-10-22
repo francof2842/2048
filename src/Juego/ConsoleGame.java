@@ -99,11 +99,12 @@ public class ConsoleGame {
     }
    }
   
-   public static void movementJson(int m, Board game) throws IOException, JSONException {
+   public static void movementJson(int m, Board game, Direction hint) throws IOException, JSONException {
        String Session = game.getSession();
        JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/state/" + Session + "/move/" + m + "/json");
        game.setBoard(json.get("grid").toString());
-       game.setScore(json.get("score").toString());
+       setBoardStatus(game, json);
+       printFullBoard(game, json, hint);
    }
     
     /**
@@ -184,6 +185,16 @@ public class ConsoleGame {
         
     }
     
+    public static void setBoardStatus (Board game,JSONObject json) throws IOException, JSONException{
+        game.setScore(json.get("score").toString());
+        game.setWon(json.get("won").toString());
+        game.setOver(json.get("over").toString());
+    }
+    
+    public static void printFullBoard(Board game, JSONObject json, Direction hint){
+        printBoard(game.getBoardArray(), game.getScore(), hint);
+    }
+    
     public static void redHat() throws CloneNotSupportedException, IOException, JSONException{
         
         int hintDepth = 7;
@@ -193,17 +204,26 @@ public class ConsoleGame {
         
         JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/start/MTG/json");
         Board game = new Board(json.get("grid").toString());
-        game.setScore(json.get("score").toString());
         game.setSession(json.get("session_id").toString());
-        game.setWon(json.get("won").toString());
-        game.setOver(json.get("over").toString());
+        setBoardStatus(game, json);
+
         
         Direction hint = AiSolver.findBestMove(game, hintDepth);
-        
         mov = dirToInt(hint);
-        movementJson(mov, game);
+        movementJson(mov, game, hint);
+        setBoardStatus(game, json);
+        printFullBoard(game, json, hint);
         
-
+        while (game.getWon() == false && game.getOver() == false){
+            hint = AiSolver.findBestMove(game, hintDepth);
+            mov = dirToInt(hint);
+            movementJson(mov, game, hint);
+            
+        }
+        
+        System.out.println("Finish Red Hat! ");
+        System.out.println("Won: " + game.getWon() );
+        System.out.println("Over: " + game.getOver());
         
     }
     
