@@ -51,7 +51,9 @@ public class ConsoleGame {
                              break;
                     case 4:  redHat();
                              break;
-                    case 5:  return;
+                    case 5:  metodoC();
+                             break;
+                    case 6:  return;
                     default: throw new Exception();
                 }
             }
@@ -72,7 +74,17 @@ public class ConsoleGame {
   }
 
    public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
-    InputStream is = new URL(url).openStream();
+    // Desde el Trabajo CON PROXY   
+    SocketAddress addr = new InetSocketAddress("proxy.corp.globant.com", 3128);
+    Proxy proxy = new Proxy(Proxy.Type.HTTP, addr);
+    
+    URL url2 = new URL(url);
+    URLConnection conn = url2.openConnection(proxy);
+    InputStream is = conn.getInputStream();
+       
+    // Desde la Casa SIN PROXY   
+    // InputStream is = new URL(url).openStream();
+    
     try {
       BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
       String jsonText = readAll(rd);
@@ -110,9 +122,10 @@ public class ConsoleGame {
         System.out.println("2. Estimate the Accuracy of AI Solver");
         System.out.println("3. Help");
         System.out.println("4. Red Hat");
-        System.out.println("5. Quit");
+        System.out.println("5. Usar metodo C");
+        System.out.println("6. Quit");
         System.out.println();
-        System.out.println("Enter a number from 1-4:");
+        System.out.println("Enter a number from 1-6:");
     }
     
     /**
@@ -186,6 +199,10 @@ public class ConsoleGame {
         System.out.println("Session Id " + game.getSession());
     }
     
+    public static void metodoC(){
+        
+    }
+    
     public static void redHat() throws CloneNotSupportedException, IOException, JSONException{
         
         int hintDepth = 7;
@@ -195,6 +212,7 @@ public class ConsoleGame {
         JSONObject json = readJsonFromUrl("http://nodejs2048-universidades.rhcloud.com/hi/start/MTG/json");
         Board game = new Board(json.get("grid").toString());
         game.setSession(json.get("session_id").toString());
+        System.out.println("Session: " + game.getSession());
         setBoardStatus(game, json);
 
         
