@@ -9,8 +9,6 @@ import java.util.Map;
 
 /**
  * The AIsolver class that uses Artificial Intelligence to estimate the next move.
- * 
- * @author Vasilis Vryniotis <bbriniotis at datumbox.com>
  */
 public class AiSolver {
     
@@ -31,28 +29,178 @@ public class AiSolver {
     
     /**
      * Method that finds the best next move.
-     * 
-     * @param theBoard
-     * @param depth
-     * @return
-     * @throws CloneNotSupportedException 
      */
     public static Direction findBestMove(Board theBoard, int depth) throws CloneNotSupportedException {
+        // Esto es usando algoritmo de MiniMax
         //Map<String, Object> result = minimax(theBoard, depth, Player.USER);
         
+        // Esto es usando algoritmo de Minimax con AlphaBeta Pruning
         Map<String, Object> result = alphabeta(theBoard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, Player.USER);
+        
+        // Esto es usando algoritmo de Espectimax
+        //Map<String, Object> result = espectimax(theBoard, depth);
         
         return (Direction)result.get("Direction");
     }
     
+    
+    
+    private static Map<String, Object> espectimax(Board theBoard, int depth) throws CloneNotSupportedException {
+        Map<String, Object> result = new HashMap<>();
+        Direction bestDirection = null;
+        double bestScore;
+        
+        bestDirection = best_direction (theBoard,depth);
+
+        bestScore = computer_move(theBoard,depth);
+        
+        
+        result.put("Score", bestScore);
+        result.put("Direction", bestDirection);
+        return result;
+    }
+    
+    private static Direction best_direction (Board theBoard, int depth) throws CloneNotSupportedException {
+        double best_score = 0;
+	int best_dir = -1;
+        
+        
+        for (int dir = 0; dir < 4; dir++) {
+            Board computerBoard = (Board) theBoard.clone();
+            computerBoard.move(IntToDir(dir));
+                if (computerBoard.isEqual(theBoard.getBoardArray(), computerBoard.getBoardArray())) {
+                    continue;
+                }
+            double computer_score = computer_move(computerBoard, 2* depth - 1);    
+                if (computer_score >= best_score){
+                    	best_score = computer_score;
+			best_dir = dir;
+                }
+        }
+        
+        Direction result = IntToDir(best_dir);
+        
+        return result;
+    }
+    
+    
+    private static double computer_move (Board theBoard, int depth) throws CloneNotSupportedException{
+        double total_score = 0;
+	double total_weight = 0;
+        Map<Board, Double> cache = new HashMap<>();
+
+        for (int x = 0; x < 4; x++) {
+            
+            for (int y = 0; y < 4; y++) {
+                if (theBoard.getBoardArray(x,y) == 0){
+                    for (int i = 0; i < 2; i++) {
+                        Board playerBoard = (Board) theBoard.clone();
+                        if (i==0){
+                            playerBoard.setBoardArray(x,y,2);
+                            double score = player_move(playerBoard,cache, depth - 1);
+                            total_score = total_score + (0.9 * score); 
+                            total_weight = total_weight + 0.9;   
+                        }else{
+                            playerBoard.setBoardArray(x,y,4);
+                            double score = player_move(playerBoard,cache, depth - 1);
+                            total_score = total_score + (0.1 * score); 
+                            total_weight = total_weight + 0.1;   
+                        }
+  
+                        
+                    }
+                }
+            }
+        }
+        return total_weight == 0 ? 0 : total_score / total_weight;
+    }
+    
+    
+    private static int evaluate_heuristic(Board theBoard) throws CloneNotSupportedException{
+        int best = 0;
+        for (int i = 0; i < 2; i++) {
+            int s = 0;
+            for (int y = 0; y < 4; y++) {
+                for (int x = 0; x < 4; x++) {
+                    
+                    s = s + (Board.WEIGHT_MATRICES[i][y][x] * theBoard.getBoardArray(x,y));
+                    
+                }
+                
+            }
+            s = Math.abs(s);
+                if (s>best){
+                    best = s;
+                }
+            
+        }
+        
+        
+        return best;
+    }
+    
+    private static double player_move(Board theBoard, Map<Board, Double> cache,int depth) throws CloneNotSupportedException{
+        
+        if (depth<=0){
+            if (!theBoard.isGameLost()){
+                return heuristicScore(theBoard);
+            }else{
+                return 0;
+            }
+            
+        }
+        
+        double best_score = 0;
+        
+        for (int dir = 0; dir < 4; dir++) {
+            Board computerBoard = (Board) theBoard.clone();
+            computerBoard.move(IntToDir(dir));
+                if (computerBoard.isEqual(theBoard.getBoardArray(), computerBoard.getBoardArray())) {
+                    continue;
+                }
+                double computer_score = 0;
+                
+                //for (Map.Entry<Board, Double> entrySet : cache.entrySet()) {
+                
+                //Board key = entrySet.getKey();
+                //Double value = entrySet.getValue();
+                
+                computer_score = computer_move(computerBoard, depth - 1);
+                
+                //entrySet.setValue(computer_score);
+                
+                if (computer_score > best_score){
+                    best_score = computer_score;
+                }
+                //}
+                
+            
+        }
+        
+        return best_score;
+    }
+    
+    
+    
+    public static Direction IntToDir (int hint){
+        if (hint==0){
+            return Direction.UP;
+        }
+        else if (hint==1){
+            return Direction.RIGHT;
+        }
+        else if (hint==2){
+            return Direction.DOWN;
+        }
+        else{
+            return Direction.LEFT;
+        }
+    }
+    
+    
+    
     /**
      * Finds the best move by using the Minimax algorithm.
-     * 
-     * @param theBoard
-     * @param depth
-     * @param player
-     * @return
-     * @throws CloneNotSupportedException 
      */
     private static Map<String, Object> minimax(Board theBoard, int depth, Player player) throws CloneNotSupportedException {
         Map<String, Object> result = new HashMap<>();
@@ -61,7 +209,7 @@ public class AiSolver {
         int bestScore;
         
         if(depth==0 || theBoard.isGameTerminated()) {
-            bestScore=heuristicScore(theBoard.getScore(),theBoard.getNumberOfEmptyCells(),calculateClusteringScore(theBoard.getBoardArray()));
+            bestScore=heuristicScore(theBoard);
         }
         else {
             if(player == Player.USER) {
@@ -121,14 +269,6 @@ public class AiSolver {
     
     /**
      * Finds the best move bay using the Alpha-Beta pruning algorithm.
-     * 
-     * @param theBoard
-     * @param depth
-     * @param alpha
-     * @param beta
-     * @param player
-     * @return
-     * @throws CloneNotSupportedException 
      */
     private static Map<String, Object> alphabeta(Board theBoard, int depth, int alpha, int beta, Player player) throws CloneNotSupportedException {
         Map<String, Object> result = new HashMap<>();
@@ -145,7 +285,7 @@ public class AiSolver {
             }
         }
         else if(depth==0) {
-            bestScore=heuristicScore(theBoard.getScore(),theBoard.getNumberOfEmptyCells(),calculateClusteringScore(theBoard.getBoardArray()));
+            bestScore=heuristicScore(theBoard);
         }
         else {
             if(player == Player.USER) {
@@ -215,23 +355,18 @@ public class AiSolver {
     /**
      * Estimates a heuristic score by taking into account the real score, the
      * number of empty cells and the clustering score of the board.
-     * 
-     * @param actualScore
-     * @param numberOfEmptyCells
-     * @param clusteringScore
-     * @return 
      */
-    private static int heuristicScore(int actualScore, int numberOfEmptyCells, int clusteringScore) {
-        int score = (int) (actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore);
+    private static int heuristicScore(Board theBoard) throws CloneNotSupportedException {
+        int actualScore = theBoard.getScore();
+        int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
+        int clusteringScore = calculateClusteringScore(theBoard.getBoardArray());
+        int score = (int) (actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore + evaluate_heuristic(theBoard));
         return Math.max(score, Math.min(actualScore, 1));
     }
     
     /**
      * Calculates a heuristic variance-like score that measures how clustered the
      * board is.
-     * 
-     * @param boardArray
-     * @return 
      */
     private static int calculateClusteringScore(int[][] boardArray) {
         int clusteringScore=0;

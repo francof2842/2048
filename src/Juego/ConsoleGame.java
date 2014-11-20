@@ -147,6 +147,7 @@ public class ConsoleGame {
             while(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE) {
                 moves++;
                 result=theGame.action(hint);
+                printBoard(theGame.getBoardArray(),theGame.getScore(),hint);
 
                 if(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE ) {
                     hint = AiSolver.findBestMove(theGame, hintDepth);
@@ -205,7 +206,7 @@ public class ConsoleGame {
     
     public static void redHat() throws CloneNotSupportedException, IOException, JSONException{
         
-        int hintDepth = 7;
+        int hintDepth = 5;
         
         System.out.println("Running Red Hat Game: ");
         
@@ -242,7 +243,7 @@ public class ConsoleGame {
         System.out.println("Play the 2048 Game!"); 
         System.out.println("Use 8 for UP, 6 for RIGHT, 2 for DOWN and 4 for LEFT. Type a to play automatically and q to exit. Press enter to submit your choice.");
         
-        int hintDepth = 7;
+        int hintDepth = 4;
         Board theGame = new Board();
         Direction hint = AiSolver.findBestMove(theGame, hintDepth);
         printBoard(theGame.getBoardArray(), theGame.getScore(), hint);
