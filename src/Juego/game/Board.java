@@ -1,9 +1,11 @@
 package Juego.game;
 
+import Juego.ai.AiSolver;
 import Juego.dataobjects.ActionStatus;
 import Juego.dataobjects.Direction;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * The main class of the Game 2048.
@@ -59,7 +61,7 @@ public class Board implements Cloneable {
     /**
      * Random Generator which is used in the creation of random cells
      */
-    //private final Random randomGenerator;
+    private final Random randomGenerator;
     
     /**
      * It caches the number of empty cells
@@ -72,7 +74,16 @@ public class Board implements Cloneable {
      */
     public Board() {
         boardArray = new int[BOARD_SIZE][BOARD_SIZE];
-        //randomGenerator = new Random(System.currentTimeMillis());
+        randomGenerator = new Random(System.currentTimeMillis());
+        
+        //addRandomCell();
+        //addRandomCell();
+        
+    }
+    
+    public Board(int Hint) {
+        boardArray = new int[BOARD_SIZE][BOARD_SIZE];
+        randomGenerator = new Random(System.currentTimeMillis());
         
         addRandomCell();
         addRandomCell();
@@ -82,7 +93,7 @@ public class Board implements Cloneable {
     public Board(String s) {
         boardArray = new int[BOARD_SIZE][BOARD_SIZE];
         setBoard(s);
-        //randomGenerator = new Random(System.currentTimeMillis());
+        randomGenerator = new Random(System.currentTimeMillis());
     }
     
     public void setBoard(String s){
@@ -124,8 +135,182 @@ public class Board implements Cloneable {
     //    return randomGenerator;
     //}
     
+    public double monotonicity2(){
+        double[] totals = {0,0,0,0};
+        
+        
+        // up down direction
+        for (int x = 0; x < 4; x++) {
+            int current = 0;
+            int next = current + 1;
+                while (next<4){
+                    while ((next < 4) && (this.getBoardArray(x, next) ==0)){
+                        next++;
+                    }
+                    if (next>=4){ next--; }
+                    double currentValue = 0;
+                    if (this.getBoardArray(x, current) !=0){
+                        currentValue = Math.log(this.getBoardArray(x, current)) / Math.log(2);
+                    }
+                    double nextValue = 0;
+                    if (this.getBoardArray(x, next) !=0){
+                        nextValue = Math.log(this.getBoardArray(x, current)) / Math.log(2);
+                    }
+                    if (currentValue > nextValue){
+                        totals[0] = totals[0] + (nextValue - currentValue);
+                    }else if (nextValue > currentValue){
+                        totals[1] = totals[1] + (currentValue - nextValue);
+                    }
+                    current = next;
+                    next++;
+                }
+        }
+        
+        
+        // left right direction
+        for (int y = 0; y < 4; y++) {
+            int current = 0;
+            int next = current + 1;
+                while (next<4){
+                    while ((next < 4) && (this.getBoardArray(next, y) ==0)){
+                        next++;
+                    }
+                    if (next>=4){ next--; }
+                    double currentValue = 0;
+                    if (this.getBoardArray(current, y) !=0){
+                        currentValue = Math.log(this.getBoardArray(current, y)) / Math.log(2);
+                    }
+                    double nextValue = 0;
+                    if (this.getBoardArray(y, next) !=0){
+                        nextValue = Math.log(this.getBoardArray(current, y)) / Math.log(2);
+                    }
+                    if (currentValue > nextValue){
+                        totals[2] = totals[2] + (nextValue - currentValue);
+                    }else if (nextValue > currentValue){
+                        totals[3] = totals[3] + (currentValue - nextValue);
+                    }
+                    current = next;
+                    next++;
+                }
+        }
+        
+        return Math.max(totals[0], totals[1]) + Math.max(totals[2], totals[3]);
+    }
+    
+    
+    public double maxValue(){
+        int max = 0;
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                int value = this.getBoardArray(x, y);
+                if (value > max){
+                    max = value;
+                }
+                
+            }
+            
+        }
+        return Math.log(max) / Math.log(2);
+    }
+    
+    
+    public double smoothness(){
+        double smooth = 0;
+        int[] target;
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                if (this.getBoardArray(x, y)!=0){
+                    double value = Math.log(this.getBoardArray(x, y)) / Math.log(2); // Potencia de 2
+                    for (int hint = 1; hint <= 2; hint++) {
+                        Direction dir = AiSolver.IntToDir(hint);
+                        target = findFarthestPosition(x, y, dir);
+                            if ((target[0] >= 0) && (target[1] >= 0) && (target[0] < 4) && (target[1] < 4)){
+                                if (this.getBoardArray(target[0], target[1]) != 0){
+                                    int targetCell = this.getBoardArray(target[0], target[1]);
+                                    double targetValue = Math.log(targetCell) / Math.log(2);
+                                    smooth = smooth - Math.abs(value - targetValue);
+                                }
+                                    
+                            }
+                        
+                    }
+                }
+                
+            }
+        }
+        return smooth;
+    }
+    
+    public int[] findFarthestPosition(int x, int y, Direction dir){
+        int[] previous = {x,y};
+        int[] cell = {previous[0],previous[1]};
+        int h = 0;
+        do{
+            previous[0] = cell[0];
+            previous[1] = cell[1];
+            switch ( dir ) {
+                case DOWN: //LEFT
+                        
+                        cell[0] = cell[0] + 1;
+                        if (cell[0]<4){
+                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
+                            if (this.getBoardArray(cell[0], cell[1]) != 0){
+                                h = 1;
+                                
+                            }
+                        }else{
+                            h = 1;
+                        }
+                    break;
+                case UP:
+                        cell[0] = cell[0] - 1;
+                        if (cell[0]>=0){
+                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
+                            if (this.getBoardArray(cell[0], cell[1]) != 0){
+                                h = 1;
+                                
+                            }
+                        }else{
+                            h = 1;
+                        }
+                    break;
+                case RIGHT:
+                        cell[1] = cell[1] + 1;
+                        if (cell[1]<4){
+                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
+                            if (this.getBoardArray(cell[0], cell[1]) != 0){
+                                h = 1;
+                            }
+                        }else{
+                            h = 1;
+                        }
+                    break;
+                case LEFT:    
+                        cell[1] = cell[1] - 1;
+                        if (cell[0]>=0){
+                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
+                            if (this.getBoardArray(cell[0], cell[1]) != 0){
+                                h = 1;
+                                
+                            }
+                        }else{
+                            h = 1;
+                        }
+                    break;
+                default:
+                    break;
+            }
+        }while (h==0);
+        return new int[] {cell[0], cell[1]};
+        // Por ahora solo necesito regresar el Next
+        //return new int[] {previous[0], previous[1] , cell[0], cell[1]};
+    }
+    
+
     /**
      * Performs one move (up, down, left or right).
+     * @param direction
+     * @return 
      */
     public int move(Direction direction) {    
         int points = 0;
@@ -420,22 +605,22 @@ public class Board implements Cloneable {
      * Creates a new Random Cell
      */
     private boolean addRandomCell() {
-//        List<Integer> emptyCells = getEmptyCellIds();
-//        
-//        int listSize=emptyCells.size();
-//        
-//        if(listSize==0) {
-//            return false;
-//        }
-//        
-//        //int randomCellId=emptyCells.get(randomGenerator.nextInt(listSize));
-//        //int randomValue=(randomGenerator.nextDouble()< 0.9)?2:4;
-//        
-//        int i = randomCellId/BOARD_SIZE;
-//        int j = randomCellId%BOARD_SIZE;
-//        
-//        setEmptyCell(i, j, randomValue);
-//        
+        List<Integer> emptyCells = getEmptyCellIds();
+        
+        int listSize=emptyCells.size();
+        
+        if(listSize==0) {
+            return false;
+        }
+        
+        int randomCellId=emptyCells.get(randomGenerator.nextInt(listSize));
+        int randomValue=(randomGenerator.nextDouble()< 0.9)?2:4;
+        
+        int i = randomCellId/BOARD_SIZE;
+        int j = randomCellId%BOARD_SIZE;
+        
+        setEmptyCell(i, j, randomValue);
+        
       return true;
     }
     

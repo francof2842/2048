@@ -143,7 +143,7 @@ public class AiSolver {
         
         if (depth<=0){
             if (!theBoard.isGameLost()){
-                return heuristicScore(theBoard);
+                return evaluateScore(theBoard);
             }else{
                 return 0;
             }
@@ -206,10 +206,10 @@ public class AiSolver {
         Map<String, Object> result = new HashMap<>();
         
         Direction bestDirection = null;
-        int bestScore;
+        double bestScore;
         
         if(depth==0 || theBoard.isGameTerminated()) {
-            bestScore=heuristicScore(theBoard);
+            bestScore=evaluateScore(theBoard);
         }
         else {
             if(player == Player.USER) {
@@ -274,7 +274,7 @@ public class AiSolver {
         Map<String, Object> result = new HashMap<>();
         
         Direction bestDirection = null;
-        int bestScore;
+        double bestScore;
         
         if(theBoard.isGameTerminated()) {
             if(theBoard.hasWon()) {
@@ -285,7 +285,7 @@ public class AiSolver {
             }
         }
         else if(depth==0) {
-            bestScore=heuristicScore(theBoard);
+            bestScore=evaluateScore(theBoard);
         }
         else {
             if(player == Player.USER) {
@@ -352,18 +352,7 @@ public class AiSolver {
         return result;
     }
     
-    /**
-     * Estimates a heuristic score by taking into account the real score, the
-     * number of empty cells and the clustering score of the board.
-     */
-    private static int heuristicScore(Board theBoard) throws CloneNotSupportedException {
-        int actualScore = theBoard.getScore();
-        int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
-        int clusteringScore = calculateClusteringScore(theBoard.getBoardArray());
-        int score = (int) (actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore + evaluate_heuristic(theBoard));
-        return Math.max(score, Math.min(actualScore, 1));
-    }
-    
+
     /**
      * Calculates a heuristic variance-like score that measures how clustered the
      * board is.
@@ -409,5 +398,40 @@ public class AiSolver {
         
         return clusteringScore;
     }
+    
+    
+    
+        /**
+     * Estimates a heuristic score by taking into account the real score, the
+     * number of empty cells and the clustering score of the board.
+     */
+    private static int heuristicScore(Board theBoard) throws CloneNotSupportedException {
+        int actualScore = theBoard.getScore();
+        int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
+        int clusteringScore = calculateClusteringScore(theBoard.getBoardArray());
+        //int score = (int) (actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore + evaluate_heuristic(theBoard));
+        //int score = evaluate_heuristic(theBoard);
+        double score = evaluateScore(theBoard);
+        int x = (int) score;
+        return Math.max(x, Math.min(actualScore, 1));
+    }
+    
+    private static double evaluateScore (Board theBoard) throws CloneNotSupportedException{
+        
+        double clustering = 0.2 * calculateClusteringScore(theBoard.getBoardArray());
+        double triangleWight = 3.0 * Math.log(evaluate_heuristic(theBoard));
+        double smoothWeight = 1.0 * theBoard.smoothness();
+        double mono2Weight  = 1.0 * theBoard.monotonicity2();
+        double emptyWeight  = 2.7 * Math.log(theBoard.getNumberOfEmptyCells());
+        double maxWeight    = 1.0 * theBoard.maxValue();
+        
+        double x = triangleWight + smoothWeight + mono2Weight + emptyWeight + maxWeight - clustering;
+        
+        return x;
+    }
+    
+    
 
 }
+
+

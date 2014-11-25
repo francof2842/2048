@@ -141,13 +141,13 @@ public class ConsoleGame {
         
         for(int i=0;i<total;++i) {
             int hintDepth = 7;
-            Board theGame = new Board();
+            Board theGame = new Board(hintDepth);
             Direction hint = AiSolver.findBestMove(theGame, hintDepth);
             ActionStatus result=ActionStatus.CONTINUE;
             while(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE) {
                 moves++;
                 result=theGame.action(hint);
-                printBoard(theGame.getBoardArray(),theGame.getScore(),hint);
+                //printBoard(theGame.getBoardArray(),theGame.getScore(),hint);
 
                 if(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE ) {
                     hint = AiSolver.findBestMove(theGame, hintDepth);
@@ -244,10 +244,11 @@ public class ConsoleGame {
         System.out.println("Use 8 for UP, 6 for RIGHT, 2 for DOWN and 4 for LEFT. Type a to play automatically and q to exit. Press enter to submit your choice.");
         
         int hintDepth = 4;
-        Board theGame = new Board();
+        Board theGame = new Board(hintDepth);
         Direction hint = AiSolver.findBestMove(theGame, hintDepth);
         printBoard(theGame.getBoardArray(), theGame.getScore(), hint);
-        
+
+
         try {
             InputStreamReader unbuffered = new InputStreamReader(System.in, "UTF8");
             char inputChar;
