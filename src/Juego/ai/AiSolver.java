@@ -1,9 +1,11 @@
 
 package Juego.ai;
 
+import Juego.ConsoleGame;
 import Juego.dataobjects.Direction;
 import Juego.game.Board;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -27,18 +29,22 @@ public class AiSolver {
         USER
     }
     
+public static final Map<String, Double> cache = new HashMap<>();
+    
     /**
      * Method that finds the best next move.
      */
     public static Direction findBestMove(Board theBoard, int depth) throws CloneNotSupportedException {
+        
+
         // Esto es usando algoritmo de MiniMax
-        //Map<String, Object> result = minimax(theBoard, depth, Player.USER);
+        //Map<String, Object> result = minimax(theBoard, 7, Player.USER);
         
         // Esto es usando algoritmo de Minimax con AlphaBeta Pruning
-        Map<String, Object> result = alphabeta(theBoard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, Player.USER);
+        //Map<String, Object> result = alphabeta(theBoard, 7, Integer.MIN_VALUE, Integer.MAX_VALUE, Player.USER);
         
         // Esto es usando algoritmo de Espectimax
-        //Map<String, Object> result = espectimax(theBoard, depth);
+        Map<String, Object> result = espectimax(theBoard, 4);
         
         return (Direction)result.get("Direction");
     }
@@ -71,7 +77,7 @@ public class AiSolver {
                 if (computerBoard.isEqual(theBoard.getBoardArray(), computerBoard.getBoardArray())) {
                     continue;
                 }
-            double computer_score = computer_move(computerBoard, 2* depth - 1);    
+            double computer_score = computer_move(computerBoard, 2 * depth - 1);    
                 if (computer_score >= best_score){
                     	best_score = computer_score;
 			best_dir = dir;
@@ -87,7 +93,7 @@ public class AiSolver {
     private static double computer_move (Board theBoard, int depth) throws CloneNotSupportedException{
         double total_score = 0;
 	double total_weight = 0;
-        Map<Board, Double> cache = new HashMap<>();
+
 
         for (int x = 0; x < 4; x++) {
             
@@ -97,12 +103,12 @@ public class AiSolver {
                         Board playerBoard = (Board) theBoard.clone();
                         if (i==0){
                             playerBoard.setBoardArray(x,y,2);
-                            double score = player_move(playerBoard,cache, depth - 1);
+                            double score = player_move(playerBoard, cache, depth - 1);
                             total_score = total_score + (0.9 * score); 
                             total_weight = total_weight + 0.9;   
                         }else{
                             playerBoard.setBoardArray(x,y,4);
-                            double score = player_move(playerBoard,cache, depth - 1);
+                            double score = player_move(playerBoard, cache, depth - 1);
                             total_score = total_score + (0.1 * score); 
                             total_weight = total_weight + 0.1;   
                         }
@@ -139,7 +145,20 @@ public class AiSolver {
         return best;
     }
     
-    private static double player_move(Board theBoard, Map<Board, Double> cache,int depth) throws CloneNotSupportedException{
+    
+    public static String getBoardToString(Board theBoard){
+        
+        String s = "";
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                s = s + theBoard.getBoardArray(x, y) + ",";
+            }
+            
+        }
+        return s;
+    }
+    
+    private static double player_move(Board theBoard, Map<String, Double> cache,int depth) throws CloneNotSupportedException{
         
         if (depth<=0){
             if (!theBoard.isGameLost()){
@@ -159,20 +178,20 @@ public class AiSolver {
                     continue;
                 }
                 double computer_score = 0;
+
+                Double value = cache.get(getBoardToString(computerBoard));
+                Iterator  It = cache.entrySet().iterator();
                 
-                //for (Map.Entry<Board, Double> entrySet : cache.entrySet()) {
-                
-                //Board key = entrySet.getKey();
-                //Double value = entrySet.getValue();
-                
-                computer_score = computer_move(computerBoard, depth - 1);
-                
-                //entrySet.setValue(computer_score);
+                if (value != null){
+                    computer_score = value.intValue();
+                }else{
+                    computer_score = computer_move(computerBoard, depth - 1);
+                    cache.put(getBoardToString(computerBoard), computer_score);
+                }
                 
                 if (computer_score > best_score){
                     best_score = computer_score;
                 }
-                //}
                 
             
         }
@@ -417,15 +436,18 @@ public class AiSolver {
     }
     
     private static double evaluateScore (Board theBoard) throws CloneNotSupportedException{
-        
+        int clusteringScore = calculateClusteringScore(theBoard.getBoardArray());
+        int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
+        int actualScore = theBoard.getScore();
+        int score = (int) (actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore );
         double clustering = 0.2 * calculateClusteringScore(theBoard.getBoardArray());
-        double triangleWight = 3.0 * Math.log(evaluate_heuristic(theBoard));
+        double triangleWight = 10.0 * Math.log(evaluate_heuristic(theBoard));
         double smoothWeight = 1.0 * theBoard.smoothness();
         double mono2Weight  = 1.0 * theBoard.monotonicity2();
         double emptyWeight  = 2.7 * Math.log(theBoard.getNumberOfEmptyCells());
         double maxWeight    = 1.0 * theBoard.maxValue();
         
-        double x = triangleWight + smoothWeight + mono2Weight + emptyWeight + maxWeight - clustering;
+        double x = score ;
         
         return x;
     }

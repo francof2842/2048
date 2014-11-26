@@ -11,6 +11,8 @@ import java.util.Scanner;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,7 +24,9 @@ import org.json.JSONObject;
  * @author Vasilis Vryniotis <bbriniotis at datumbox.com>
  */
 public class ConsoleGame {
-
+    
+    
+    
     /**
      * Main function of the game.
      * 
@@ -128,6 +132,40 @@ public class ConsoleGame {
         System.out.println("Enter a number from 1-6:");
     }
     
+    
+      static void updateProgress(double percent) {
+    //final int width = 50; // progress bar width in chars
+
+    //System.out.print("\r[");
+    
+    //for (int i = 0; i <= (int)(progressPercentage*width); i++) {
+    //  System.out.print(".");
+    //}
+    //for (int i = 0; i < width; i++) {
+    //  System.out.print(" ");
+    //}
+    //System.out.print("]");
+          
+    StringBuilder bar = new StringBuilder("[");
+
+    for(double i = 0; i < 50; i++){
+        if( i < (percent/2)){
+            bar.append("=");
+        }else if( i == (percent/2)){
+            bar.append(">");
+        }else{
+            bar.append(" ");
+        }
+    }
+
+    bar.append("]   " + percent + "%     ");
+    System.out.print("\r" + bar.toString());
+  }
+
+ 
+ 
+    
+    
     /**
      * Estimates the accuracy of the AI solver by running multiple games.
      * 
@@ -135,16 +173,24 @@ public class ConsoleGame {
      */
     public static void calculateAccuracy() throws CloneNotSupportedException {
         int wins=0;
-        int total=10;
+        int total=5;
         int moves = 0;
         System.out.println("Running "+total+" games to estimate the accuracy:");
+
         
         for(int i=0;i<total;++i) {
-            int hintDepth = 7;
+            long startTime = System.nanoTime(); 
+            System.out.println("Start Time: " + startTime);
+            AiSolver.cache.clear();
+            int hintDepth = 5;
             Board theGame = new Board(hintDepth);
             Direction hint = AiSolver.findBestMove(theGame, hintDepth);
             ActionStatus result=ActionStatus.CONTINUE;
             while(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE) {
+                //System.out.println(moves);
+                double y = moves;
+                double x = y/10;
+                updateProgress(x);
                 moves++;
                 result=theGame.action(hint);
                 //printBoard(theGame.getBoardArray(),theGame.getScore(),hint);
@@ -157,6 +203,9 @@ public class ConsoleGame {
             if(result == ActionStatus.WIN) {
                 ++wins;
                 System.out.println("Game "+(i+1)+" - won in " + moves + " moves.");
+                
+                long estimatedTime = System.nanoTime() - startTime;
+                System.out.println("Elapsed Time: " + estimatedTime);
                 moves = 0;
             }
             else {
