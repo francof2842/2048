@@ -1,7 +1,7 @@
 
 package Juego.ai;
 
-import Juego.ConsoleGame;
+
 import Juego.dataobjects.Direction;
 import Juego.game.Board;
 import java.util.HashMap;
@@ -436,20 +436,90 @@ public static final Map<String, Double> cache = new HashMap<>();
     }
     
     private static double evaluateScore (Board theBoard) throws CloneNotSupportedException{
-        int clusteringScore = calculateClusteringScore(theBoard.getBoardArray());
-        int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
-        int actualScore = theBoard.getScore();
-        int score = (int) (actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore );
-        double clustering = 0.2 * calculateClusteringScore(theBoard.getBoardArray());
-        double triangleWight = 10.0 * Math.log(evaluate_heuristic(theBoard));
-        double smoothWeight = 1.0 * theBoard.smoothness();
-        double mono2Weight  = 1.0 * theBoard.monotonicity2();
-        double emptyWeight  = 2.7 * Math.log(theBoard.getNumberOfEmptyCells());
-        double maxWeight    = 1.0 * theBoard.maxValue();
+        //double clusteringScore = Math.log(calculateClusteringScore(theBoard.getBoardArray()));
+        //int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
+        //int actualScore = theBoard.getScore();
+        //double score =  Math.log(actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore );
+        //double clustering = 0.2 * calculateClusteringScore(theBoard.getBoardArray());
+        double triangleWight = evaluate_heuristic(theBoard);
+        //double smoothWeight = 1.0 * theBoard.smoothness();
+        //double mono2Weight  = 1.0 * theBoard.monotonicity2();
+        //double emptyWeight  = 2.7 * Math.log(theBoard.getNumberOfEmptyCells());
+        //double maxWeight    = 1.0 * theBoard.maxValue();
         
-        double x = score ;
+        double x = triangleWight; 
         
         return x;
+    }
+    
+    private static double possibleMerges(Board theBoard){
+        
+        
+        
+        return 0.0;
+    }
+    
+    
+    private static double heuristic(Board theBoard){
+        
+        
+        double SCORE_LOST_PENALTY = 200000.0;
+        double SCORE_MONOTONICITY_POWER = 4.0;
+        double SCORE_MONOTONICITY_WEIGHT = 47.0;
+        double SCORE_SUM = 3.5;
+        double SCORE_SUM_WEIGHT = 11.0;
+        double SCORE_MERGES_WEIGHT = 700.0;
+        double SCORE_EMPTY_WEIGHT = 270.0;
+        
+        
+        double sum = 0.0;
+        int empty = 0;
+        int merges = 0;
+        
+        int prev = 0;
+        int counter = 0;
+        
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+            int rank = theBoard.getBoardArray(x, y);
+            sum = sum + Math.pow(rank, SCORE_SUM);
+            
+                if (rank == 0){
+                    empty++;
+                }else{
+                    if (prev == rank){
+                        counter++;
+                    }else if (counter > 0){
+                        merges = merges + 1 + counter;
+                        counter = 0;
+                    }
+                prev = rank;
+                }
+            
+            }
+        }
+        
+        if (counter > 0){
+            merges = merges + 1 + counter;
+        }
+        
+        
+        double monotonicity_left = 0.0;
+        double monotonicity_right = 0.0;
+        
+        for (int x = 1; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                int previous = theBoard.getBoardArray(x-1, y);
+                int current = theBoard.getBoardArray(x, y);
+                if (previous > current){
+                    monotonicity_left = monotonicity_left + Math.pow(previous, SCORE_MONOTONICITY_POWER) - Math.pow(current, SCORE_MONOTONICITY_POWER);
+                } else{
+                    monotonicity_right = monotonicity_right + Math.pow(current, SCORE_MONOTONICITY_POWER) - Math.pow(previous, SCORE_MONOTONICITY_POWER);
+                }
+            }
+        }   
+        
+        return SCORE_LOST_PENALTY + SCORE_EMPTY_WEIGHT * empty + SCORE_MERGES_WEIGHT * merges - SCORE_MONOTONICITY_WEIGHT * Math.min(monotonicity_left, monotonicity_right) - SCORE_SUM_WEIGHT * sum;
     }
     
     

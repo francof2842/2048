@@ -11,8 +11,6 @@ import java.util.Scanner;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -172,9 +170,11 @@ public class ConsoleGame {
      * @throws CloneNotSupportedException 
      */
     public static void calculateAccuracy() throws CloneNotSupportedException {
-        int wins=0;
-        int total=5;
+        int wins = 0;
+        int total = 5;
         int moves = 0;
+        int movesTotal = 0;
+        int tiempoTotal = 0;
         System.out.println("Running "+total+" games to estimate the accuracy:");
 
         
@@ -206,15 +206,23 @@ public class ConsoleGame {
                 
                 long estimatedTime = System.nanoTime() - startTime;
                 System.out.println("Elapsed Time: " + estimatedTime);
+                tiempoTotal = tiempoTotal + (int)(estimatedTime/100000000);
+                movesTotal = movesTotal + moves;
                 moves = 0;
             }
             else {
                 System.out.println("Game "+(i+1)+" - lost in " + moves + " moves.");
+                long estimatedTime = System.nanoTime() - startTime;
+                System.out.println("Elapsed Time: " + estimatedTime);
+                tiempoTotal = tiempoTotal + (int)(estimatedTime/100000000);
+                movesTotal = movesTotal + moves;
                 moves = 0;
             }
         }
         
         System.out.println(wins+" wins out of "+total+" games.");
+        System.out.println("Tiempo Total Promedio: " + tiempoTotal / total);
+        System.out.println("Movimientos Totales Promedio: " + movesTotal / total);
     }
     
     public static int dirToInt (Direction hint){
@@ -239,8 +247,6 @@ public class ConsoleGame {
         game.setWon(json.get("won").toString());
         game.setOver(json.get("over").toString());
         game.setMoves(json.get("moves").toString());
-        
-        
     }
     
     public static void printFullBoard(Board game, JSONObject json, Direction hint){
@@ -280,7 +286,9 @@ public class ConsoleGame {
         System.out.println("Finish Red Hat! ");
         System.out.println("Won: " + game.getWon() );
         System.out.println("Over: " + game.getOver());
-        
+        System.out.println("Score: " + game.getScore());
+        System.out.println("Total Number of Movements: " + game.getMoves());
+        System.out.println("Session Id: " + game.getSession());
     }
     
     /**
