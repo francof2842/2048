@@ -44,7 +44,12 @@ public static final Map<String, Double> cache = new HashMap<>();
         //Map<String, Object> result = alphabeta(theBoard, 7, Integer.MIN_VALUE, Integer.MAX_VALUE, Player.USER);
         
         // Esto es usando algoritmo de Espectimax
-        Map<String, Object> result = espectimax(theBoard, 4);
+        //System.out.println("Cache antes del Clean: " + cache.size());
+        //cleanCache(theBoard);
+        int x = distincTiles(theBoard);
+        int y = Math.max(4, x-5);
+        //System.out.println("Depth: " + x + "Depth Real: " +y+ " - Tamaño Cache: " + cache.size());
+        Map<String, Object> result = espectimax(theBoard, y);
         
         return (Direction)result.get("Direction");
     }
@@ -58,10 +63,10 @@ public static final Map<String, Double> cache = new HashMap<>();
         
         bestDirection = best_direction (theBoard,depth);
 
-        bestScore = computer_move(theBoard,depth);
+        //bestScore = computer_move(theBoard,depth);
         
         
-        result.put("Score", bestScore);
+        result.put("Score", 0);
         result.put("Direction", bestDirection);
         return result;
     }
@@ -77,7 +82,7 @@ public static final Map<String, Double> cache = new HashMap<>();
                 if (computerBoard.isEqual(theBoard.getBoardArray(), computerBoard.getBoardArray())) {
                     continue;
                 }
-            double computer_score = computer_move(computerBoard, 2 * depth - 1);    
+            double computer_score = computer_move(computerBoard, 2*depth - 1);    
                 if (computer_score >= best_score){
                     	best_score = computer_score;
 			best_dir = dir;
@@ -440,14 +445,14 @@ public static final Map<String, Double> cache = new HashMap<>();
         //int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
         //int actualScore = theBoard.getScore();
         //double score =  Math.log(actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore );
-        //double clustering = 0.2 * calculateClusteringScore(theBoard.getBoardArray());
+        double clustering = 0.2 * calculateClusteringScore(theBoard.getBoardArray());
         double triangleWight = evaluate_heuristic(theBoard);
         //double smoothWeight = 1.0 * theBoard.smoothness();
         //double mono2Weight  = 1.0 * theBoard.monotonicity2();
         //double emptyWeight  = 2.7 * Math.log(theBoard.getNumberOfEmptyCells());
         //double maxWeight    = 1.0 * theBoard.maxValue();
         
-        double x = triangleWight; 
+        double x = triangleWight +  clustering; 
         
         return x;
     }
@@ -523,7 +528,99 @@ public static final Map<String, Double> cache = new HashMap<>();
     }
     
     
+    
+    public static int distincTiles(Board theBoard){
+        int i = 0;
+        int[] lista = new int[16];
+        int[] unique = new int[16];
+        int counter = 0;
+        
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                lista[counter] = theBoard.getBoardArray(x, y);
+                counter++;
+            }
+        }
+        unique = toUniqueArray(lista);
+        
+        return unique.length;
+    }
+    
+    public static boolean isUnique(int[] array, int num) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == num) {
+                return false;
+            }
+        }
+        return true;
+    }
+ 
+    /**
+     * Convert the given array to an array with unique values â€“
+     * without duplicates and Return it
+     */
+    public static int[] toUniqueArray(int[] array) {
+        int[] temp = new int[array.length];
+ 
+        for (int i = 0; i < temp.length; i++) {
+            temp[i] = -1; // in case u have value of 0 in he array
+        }
+        int counter = 0;
+ 
+        for (int i = 0; i < array.length; i++) {
+            if (isUnique(temp, array[i]))
+                temp[counter++] = array[i];
+        }
+        int[] uniqueArray = new int[counter];
+ 
+        System.arraycopy(temp, 0, uniqueArray, 0, uniqueArray.length);
+ 
+        return uniqueArray;
+    }
+    
+    
+    public static void cleanCache(Board theBoard){
+    String s;   
+    int high = highValue(stringToInt(getBoardToString(theBoard)));
+      for(Iterator<Map.Entry<String, Double>> it = cache.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry<String, Double> entry = it.next();
+        s = entry.getKey();
+        int a = highValue(stringToInt(s));
+        if(a < high) {
+          it.remove();
+        }
+      }
+    }
+    
+    public static int[] stringToInt(String s){
 
+            String[] items = s.replaceAll("\\[", "").replaceAll("\\]", "").split(",");
+
+            int[] results = new int[items.length];
+
+            for (int i = 0; i < items.length; i++) {
+                try {
+                    results[i] = Integer.parseInt(items[i]);
+                } catch (NumberFormatException nfe) {};
+            }
+            
+            return results;
+    }
+    
+    public static int highValue(int[] a){
+        int max = 0;
+        
+        for (int counter = 1; counter < a.length; counter++)
+            {
+                 if (a[counter] > max)
+                 {
+                  max = a[counter];
+                 }
+            }
+        
+        return max;
+        }
+    
 }
 
 

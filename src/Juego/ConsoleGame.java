@@ -171,7 +171,7 @@ public class ConsoleGame {
      */
     public static void calculateAccuracy() throws CloneNotSupportedException {
         int wins = 0;
-        int total = 5;
+        int total = 10;
         int moves = 0;
         int movesTotal = 0;
         int tiempoTotal = 0;

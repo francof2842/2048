@@ -215,6 +215,20 @@ public class Board implements Cloneable {
         return Math.log(max) / Math.log(2);
     }
     
+    public int smootheeee(){
+        
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 10; y++) {
+                int actual = this.getBoardArray(x, y);
+                
+            }
+        }
+        
+        
+        return 0;
+    }
+    
+    
     
     public double smoothness(){
         double smooth = 0;
