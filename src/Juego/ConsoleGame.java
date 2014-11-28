@@ -68,15 +68,15 @@ public class ConsoleGame {
 
    public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
     // Desde el Trabajo CON PROXY   
-    SocketAddress addr = new InetSocketAddress("proxy.corp.globant.com", 3128);
-    Proxy proxy = new Proxy(Proxy.Type.HTTP, addr);
+    //SocketAddress addr = new InetSocketAddress("proxy.corp.globant.com", 3128);
+    //Proxy proxy = new Proxy(Proxy.Type.HTTP, addr);
     
-    URL url2 = new URL(url);
-    URLConnection conn = url2.openConnection(proxy);
-    InputStream is = conn.getInputStream();
+    //URL url2 = new URL(url);
+    //URLConnection conn = url2.openConnection(proxy);
+    //InputStream is = conn.getInputStream();
        
     // Desde la Casa SIN PROXY   
-    // InputStream is = new URL(url).openStream();
+    InputStream is = new URL(url).openStream();
     
     try {
       BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
