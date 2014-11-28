@@ -16,53 +16,44 @@ import org.json.JSONObject;
 
 
 
-/**
- * The main class of the Game.
- * 
- * @author Vasilis Vryniotis <bbriniotis at datumbox.com>
- */
+
 public class ConsoleGame {
     
     
     
-    /**
-     * Main function of the game.
-     * 
-     * @param args
-     * @throws CloneNotSupportedException 
-     */
+  
     public static void main(String[] args) throws CloneNotSupportedException {
         
         System.out.println("The 2048 Game in JAVA!");
         System.out.println("======================");
         System.out.println();
-
-        
-        while(true) {
-            printMenu();
-            int choice;
-            try {
-                Scanner sc = new Scanner (System.in);     
-                choice = sc.nextInt();
-                switch (choice) {
-                    case 1:  playGame();
-                             break;
-                    case 2:  calculateAccuracy();
-                             break;
-                    case 3:  help();
-                             break;
-                    case 4:  redHat();
-                             break;
-                    case 5:  metodoC();
-                             break;
-                    case 6:  return;
-                    default: throw new Exception();
-                }
-            }
-            catch(Exception e) {
-                System.out.println("Wrong choice");
-            }
+        try {
+            redHat();
+        } catch (Exception e) {
+            System.out.println("Wrong choice");
         }
+        
+//        while(true) {
+//            printMenu();
+//            int choice;
+//            try {
+//                Scanner sc = new Scanner (System.in);     
+//                choice = sc.nextInt();
+//                switch (choice) {
+//                    case 1:  playGame();
+//                             break;
+//                    case 2:  calculateAccuracy();
+//                             break;
+//                    case 3:  redHat();
+//                             break;
+//                    case 4:  return;
+//                    default: throw new Exception();
+//                }
+//            }
+//            catch(Exception e) {
+//                System.out.println("Wrong choice");
+//            }
+//        }
     }
     
     
@@ -107,43 +98,23 @@ public class ConsoleGame {
        printFullBoard(game, json, hint);
    }
     
-    /**
-     * Prints Help menu
-     */
-    public static void help() {
-        System.out.println("Seriously?!?!?");
-    }
-    
-    /**
-     * Prints main menu
-     */
+
+
+
     public static void printMenu() {
         System.out.println();
         System.out.println("Choices:");
         System.out.println("1. Play the 2048 Game");
-        System.out.println("2. Estimate the Accuracy of AI Solver");
-        System.out.println("3. Help");
-        System.out.println("4. Red Hat");
-        System.out.println("5. Usar metodo C");
-        System.out.println("6. Quit");
+        System.out.println("2. Run 100 Games with local API");
+        System.out.println("3. Red Hat");
+        System.out.println("4. Quit");
         System.out.println();
         System.out.println("Enter a number from 1-6:");
     }
     
     
       static void updateProgress(double percent) {
-    //final int width = 50; // progress bar width in chars
 
-    //System.out.print("\r[");
-    
-    //for (int i = 0; i <= (int)(progressPercentage*width); i++) {
-    //  System.out.print(".");
-    //}
-    //for (int i = 0; i < width; i++) {
-    //  System.out.print(" ");
-    //}
-    //System.out.print("]");
-          
     StringBuilder bar = new StringBuilder("[");
 
     for(double i = 0; i < 50; i++){
@@ -164,14 +135,9 @@ public class ConsoleGame {
  
     
     
-    /**
-     * Estimates the accuracy of the AI solver by running multiple games.
-     * 
-     * @throws CloneNotSupportedException 
-     */
     public static void calculateAccuracy() throws CloneNotSupportedException {
         int wins = 0;
-        int total = 10;
+        int total = 100;
         int moves = 0;
         int movesTotal = 0;
         int tiempoTotal = 0;
@@ -184,19 +150,17 @@ public class ConsoleGame {
             AiSolver.cache.clear();
             int hintDepth = 5;
             Board theGame = new Board(hintDepth);
-            Direction hint = AiSolver.findBestMove(theGame, hintDepth);
+            Direction hint = AiSolver.findBestMove(theGame);
             ActionStatus result=ActionStatus.CONTINUE;
             while(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE) {
-                //System.out.println(moves);
                 double y = moves;
                 double x = y/10;
                 updateProgress(x);
                 moves++;
                 result=theGame.action(hint);
-                //printBoard(theGame.getBoardArray(),theGame.getScore(),hint);
 
                 if(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE ) {
-                    hint = AiSolver.findBestMove(theGame, hintDepth);
+                    hint = AiSolver.findBestMove(theGame);
                 }
             }
 
@@ -272,13 +236,13 @@ public class ConsoleGame {
         setBoardStatus(game, json);
 
         
-        Direction hint = AiSolver.findBestMove(game, hintDepth);
+        Direction hint = AiSolver.findBestMove(game);
         movementJson(game, hint);
         setBoardStatus(game, json);
         printFullBoard(game, json, hint);
         
         while (game.getWon() == false && game.getOver() == false){
-            hint = AiSolver.findBestMove(game, hintDepth);
+            hint = AiSolver.findBestMove(game);
             movementJson(game, hint);
             
         }
@@ -291,18 +255,14 @@ public class ConsoleGame {
         System.out.println("Session Id: " + game.getSession());
     }
     
-    /**
-     * Method which allows playing the game.
-     * 
-     * @throws CloneNotSupportedException 
-     */
+
     public static void playGame() throws CloneNotSupportedException {
         System.out.println("Play the 2048 Game!"); 
         System.out.println("Use 8 for UP, 6 for RIGHT, 2 for DOWN and 4 for LEFT. Type a to play automatically and q to exit. Press enter to submit your choice.");
         
         int hintDepth = 4;
         Board theGame = new Board(hintDepth);
-        Direction hint = AiSolver.findBestMove(theGame, hintDepth);
+        Direction hint = AiSolver.findBestMove(theGame);
         printBoard(theGame.getBoardArray(), theGame.getScore(), hint);
 
 
@@ -313,7 +273,7 @@ public class ConsoleGame {
             ActionStatus result=ActionStatus.CONTINUE;
             while(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE) {
                 inputChar = (char)unbuffered.read();
-                //inputChar = 'a';
+
                 if(inputChar=='\n' || inputChar=='\r') {
                     continue;
                 }
@@ -342,7 +302,7 @@ public class ConsoleGame {
                 }
                 
                 if(result==ActionStatus.CONTINUE || result==ActionStatus.INVALID_MOVE ) {
-                    hint = AiSolver.findBestMove(theGame, hintDepth);
+                    hint = AiSolver.findBestMove(theGame);
                 }
                 else {
                     hint = null;
@@ -359,13 +319,7 @@ public class ConsoleGame {
         }
     }
     
-    /**
-     * Prints the Board
-     * 
-     * @param boardArray
-     * @param score 
-     * @param hint 
-     */
+
     public static void printBoard(int[][] boardArray, int score, Direction hint) {
         System.out.println("-------------------------");
         System.out.println("Score:\t" + String.valueOf(score));

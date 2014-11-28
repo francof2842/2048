@@ -7,23 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * The main class of the Game 2048.
- */
+
 public class Board implements Cloneable {
-    /**
-     * The size of the board
-     */
+
     public static final int BOARD_SIZE = 4;
-    
-    /**
-     * The maximum combination in which the game terminates
-     */
+
     public static final int TARGET_POINTS = 2048;
     
-    /**
-     * The theoretical minimum win score until the target point is reached
-     */
+
     public static final int MINIMUM_WIN_SCORE = 18432;
     
     public static final int[][][] WEIGHT_MATRICES =  {
@@ -41,9 +32,7 @@ public class Board implements Cloneable {
 		}
 };
     
-    /**
-     * The score so far
-     */
+
     private int score=0;
     private int moves=0;
     
@@ -53,25 +42,15 @@ public class Board implements Cloneable {
     
     private String Session=null;
     
-    /**
-     * The board values
-     */
     private int[][] boardArray;
-    
-    /**
-     * Random Generator which is used in the creation of random cells
-     */
+
     private final Random randomGenerator;
     
-    /**
-     * It caches the number of empty cells
-     */
+
     private Integer cache_emptyCells=null;
     private String s;
     
-    /**
-     * Constructor without arguments. It initializes randomly the Board
-     */
+
     public Board() {
         boardArray = new int[BOARD_SIZE][BOARD_SIZE];
         randomGenerator = new Random(System.currentTimeMillis());
@@ -104,9 +83,7 @@ public class Board implements Cloneable {
         
     }
     
-    /**
-     * Deep clone
-     */
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         Board copy = (Board)super.clone();
@@ -114,28 +91,18 @@ public class Board implements Cloneable {
         return copy;
     }
     
-    /**
-     * Getter for score attribute
-     */
+
     public int getScore() {
         return score;
     }
     
-    /**
-     * Getter for BoardArray
-     */
+
     public int[][] getBoardArray() {
         return clone2dArray(boardArray);
     }
     
     
-    
-    /**
-     * Getter for RandomGenerator field
-     */
-    //public Random getRandomGenerator() {
-    //    return randomGenerator;
-    //}
+
     
     public double monotonicity2(){
         double[] totals = {0,0,0,0};
@@ -269,7 +236,6 @@ public class Board implements Cloneable {
                         
                         cell[0] = cell[0] + 1;
                         if (cell[0]<4){
-                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
                             if (this.getBoardArray(cell[0], cell[1]) != 0){
                                 h = 1;
                                 
@@ -281,7 +247,6 @@ public class Board implements Cloneable {
                 case UP:
                         cell[0] = cell[0] - 1;
                         if (cell[0]>=0){
-                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
                             if (this.getBoardArray(cell[0], cell[1]) != 0){
                                 h = 1;
                                 
@@ -293,7 +258,6 @@ public class Board implements Cloneable {
                 case RIGHT:
                         cell[1] = cell[1] + 1;
                         if (cell[1]<4){
-                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
                             if (this.getBoardArray(cell[0], cell[1]) != 0){
                                 h = 1;
                             }
@@ -304,7 +268,6 @@ public class Board implements Cloneable {
                 case LEFT:    
                         cell[1] = cell[1] - 1;
                         if (cell[0]>=0){
-                            //System.out.println(this.getBoardArray(cell[0], cell[1]));
                             if (this.getBoardArray(cell[0], cell[1]) != 0){
                                 h = 1;
                                 
@@ -323,11 +286,6 @@ public class Board implements Cloneable {
     }
     
 
-    /**
-     * Performs one move (up, down, left or right).
-     * @param direction
-     * @return 
-     */
     public int move(Direction direction) {    
         int points = 0;
         
@@ -396,9 +354,7 @@ public class Board implements Cloneable {
         return points;
     }
     
-    /**
-     * Returns the Ids of the empty cells. The cells are numbered by row.
-     */
+
     public List<Integer> getEmptyCellIds() {
         List<Integer> cellList = new ArrayList<>();
         
@@ -413,9 +369,7 @@ public class Board implements Cloneable {
         return cellList;
     }
     
-    /**
-     * Counts the number of empty cells
-     */
+
     public int getNumberOfEmptyCells() {
         if(cache_emptyCells==null) {
             cache_emptyCells = getEmptyCellIds().size();
@@ -423,10 +377,7 @@ public class Board implements Cloneable {
         return cache_emptyCells;
     }
     
-    /**
-     * Checks if any of the cells in the board has value equal or larger than the
-     * target.
-     */
+
     public boolean hasWon() {
         if(score<MINIMUM_WIN_SCORE) { //speed optimization
             return false;
@@ -442,9 +393,7 @@ public class Board implements Cloneable {
         return false;
     }
     
-    /**
-     * Checks whether the game is terminated
-     */
+
     public boolean isGameTerminated() throws CloneNotSupportedException {
         boolean terminated=false;
         
@@ -493,9 +442,7 @@ public class Board implements Cloneable {
         return lost;
     }
     
-    /**
-     * Performs an Up, Right, Down or Left move
-     */
+
     public ActionStatus action(Direction direction) throws CloneNotSupportedException {
         ActionStatus result = ActionStatus.CONTINUE;
         
@@ -532,9 +479,7 @@ public class Board implements Cloneable {
         return result;
     }
     
-    /**
-     * Sets the value to an empty cell. 
-     */
+
     public void setEmptyCell(int i, int j, int value) {
         if(boardArray[i][j]==0) {
             boardArray[i][j]=value;
@@ -587,9 +532,7 @@ public class Board implements Cloneable {
     }
     
     
-    /**
-     * Rotates the board on the left
-     */
+
     private void rotateLeft() {
         int[][] rotatedBoard = new int[BOARD_SIZE][BOARD_SIZE];
         
@@ -602,9 +545,7 @@ public class Board implements Cloneable {
         boardArray=rotatedBoard;
     }
     
-    /**
-     * Rotates the board on the right
-     */
+
     private void rotateRight() {
         int[][] rotatedBoard = new int[BOARD_SIZE][BOARD_SIZE];
         
@@ -617,9 +558,7 @@ public class Board implements Cloneable {
         boardArray=rotatedBoard;
     }
     
-    /**
-     * Creates a new Random Cell
-     */
+
     private boolean addRandomCell() {
         List<Integer> emptyCells = getEmptyCellIds();
         
@@ -640,9 +579,7 @@ public class Board implements Cloneable {
       return true;
     }
     
-    /**
-     * Clones a 2D array
-     */
+
     private int[][] clone2dArray(int[][] original) { 
         int[][] copy = new int[original.length][];
         for(int i=0;i<original.length;++i) {
@@ -652,10 +589,7 @@ public class Board implements Cloneable {
     }
     
 
-    
-    /**
-     * Checks whether the two input boards are same.
-     */
+
     public boolean isEqual(int[][] currBoardArray, int[][] newBoardArray) {
 
     	boolean equal = true;

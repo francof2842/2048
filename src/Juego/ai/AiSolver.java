@@ -34,7 +34,7 @@ public static final Map<String, Double> cache = new HashMap<>();
     /**
      * Method that finds the best next move.
      */
-    public static Direction findBestMove(Board theBoard, int depth) throws CloneNotSupportedException {
+    public static Direction findBestMove(Board theBoard) throws CloneNotSupportedException {
         
 
         // Esto es usando algoritmo de MiniMax
@@ -442,7 +442,7 @@ public static final Map<String, Double> cache = new HashMap<>();
     
     private static double evaluateScore (Board theBoard) throws CloneNotSupportedException{
         //double clusteringScore = Math.log(calculateClusteringScore(theBoard.getBoardArray()));
-        //int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
+        int numberOfEmptyCells = theBoard.getNumberOfEmptyCells();
         //int actualScore = theBoard.getScore();
         //double score =  Math.log(actualScore+Math.log(actualScore)*numberOfEmptyCells -clusteringScore );
         double clustering = 0.2 * calculateClusteringScore(theBoard.getBoardArray());
@@ -452,7 +452,7 @@ public static final Map<String, Double> cache = new HashMap<>();
         //double emptyWeight  = 2.7 * Math.log(theBoard.getNumberOfEmptyCells());
         //double maxWeight    = 1.0 * theBoard.maxValue();
         
-        double x = triangleWight +  clustering; 
+        double x = triangleWight -  clustering + numberOfEmptyCells; 
         
         return x;
     }
