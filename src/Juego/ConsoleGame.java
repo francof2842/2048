@@ -5,20 +5,37 @@ import Juego.ai.AiSolver;
 import Juego.dataobjects.ActionStatus;
 import Juego.game.Board;
 import Juego.dataobjects.Direction;
+
+import java.applet.Applet;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
 
 
-public class ConsoleGame {
+public class ConsoleGame extends Applet {
     
+    public void init(){
+        setBackground(Color.white);
+    }
+    public void paint(Graphics g) {        
+    	//Draw a rectangle width=250, height=100       
+    	g.drawRect(0,0,250,100);         
+    	//Set the color to blue      
+    	g.setColor(Color.blue);         
+    	//Write the message to the web page       
+    	g.drawString("Look at me, I'm a Java Applet!",10,50);    
+    	
+    }
     
     
   
